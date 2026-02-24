@@ -32,6 +32,17 @@ func main() {
 	}
 
 	logs := processFiles(currentDir, jpegDir, files)
+
+	heicCount := 0
+	for _, f := range files {
+		if strings.ToLower(filepath.Ext(f.Name())) == ".heic" {
+			heicCount++
+		}
+	}
+	if heicCount == 0 {
+		fmt.Println("No .heic files found in the current directory.")
+	}
+
 	saveLogsToFile(jpegDir, logs)
 
 	fmt.Println("Program completed!")
@@ -166,7 +177,11 @@ func aggregateLogs(logChan chan map[string]string, logs map[string][]string, cur
 	totalLogLines := len(logs)
 	generalLogs = append(generalLogs, fmt.Sprintf("\n%v Files", totalLogLines))
 	generalLogs = append(generalLogs, fmt.Sprintf("Total Time Taken==%v", totalDuration))
-	generalLogs = append(generalLogs, fmt.Sprintf("Average Time Per File==%v", totalDuration/time.Duration(totalLogLines)))
+	if totalLogLines > 0 {
+		generalLogs = append(generalLogs, fmt.Sprintf("Average Time Per File==%v", totalDuration/time.Duration(totalLogLines)))
+	} else {
+		generalLogs = append(generalLogs, "Average Time Per File==N/A (no HEIC files found)")
+	}
 	generalLogs = append(generalLogs, fmt.Sprintf("Total HEIC File Size==%s", humanReadableFileSize(totalHEICSize)))
 	generalLogs = append(generalLogs, fmt.Sprintf("Total JPEG Folder Size==%s", humanReadableFileSize(totalJPEGSize)))
 
